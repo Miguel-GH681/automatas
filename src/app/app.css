@@ -1,0 +1,138 @@
+html, body{
+    margin: 0;
+    padding: 0;
+}
+
+.wrapper{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: linear-gradient(45deg, #18235b, #763a5c);
+}
+
+.header{
+    height: 55px;
+    background: linear-gradient(45deg, #15214b, #3f2b4d);
+    color: rgba(255,255,255,0.85);
+    padding-left: 20px;
+    padding-right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 25px;
+}
+
+.content{
+    flex: 1;
+    padding: 0px 80px;
+}
+
+.stack{
+    width: 50px;
+    height: 160px;
+    background-color: rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #26b4be;
+}
+
+.stackItem {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);;
+}
+
+.container-stack{
+    width: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header-container-file{
+    height: 45px;
+    background: #1b142d;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header-container-file p{
+    margin: 0;
+    color: #FFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+}
+
+.container-file{
+    background: rgba(0,0,0,0.3);
+    padding: 20px;
+    box-sizing: border-box;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #FFF;
+}
+
+.header-elements-container{
+    height: 45px;
+    background: #1b142d;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #FFF;
+}
+
+.elements-container{
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    color: #FFF;
+}
+
+.col{
+    height: 75px;
+    background-color: #1b142d;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: #26b4be;
+}
+
+.matrix-container{
+    background: rgba(0,0,0,0.3);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    padding: 25px;
+    color: #FFF;
+}
+
+.btn-clean{
+    background-color: #1b142d;
+    color: #FFF;
+}
+
+.container-image{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.container-image img{
+    margin-top: 10vh;
+    height: 50vh;
+}
+
