@@ -1,5 +1,14 @@
+<div class="navbar">
+  <div class="icon">
+    <img src="assets/img/automapp.png" alt="icon">
+    <p>Automapp</p>
+  </div>
+  <div>
+    <p>Alvaro Miguel González Hic - 9490224805</p>
+  </div>
+</div>
 <div class="p-4">
-  <h2>Tabla de Transición D (AFND → AFD)</h2>
+  <h5>Cargar archivo TXT</h5>
 
   <ngx-file-drop
     accept=".txt"
@@ -7,22 +16,120 @@
     (onFileDrop)="onFileDropped($event)">
   </ngx-file-drop>
 
-  <div *ngIf="table.length > 0" class="mt-4">
-    <table border="1" cellpadding="6">
-      <thead>
-        <tr>
-          <th>Estado</th>
-          <th *ngFor="let symbol of alphabet">{{ symbol }}</th>
-          <th>Composición</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let row of table">
-          <td>{{ row.name }}</td>
-          <td *ngFor="let symbol of alphabet">{{ row.transitions[symbol] }}</td>
-          <td>{{ '{' + row.composition.join(',') + '}' }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="row mt-2">
+    <div class="col-6">
+      <p>Despliegue del archivo</p>
+      <hr>
+      <pre>{{ fileContent }}</pre>
+    </div>
+    <div class="col-6">
+      <p>Autómata Finito Determinista</p>
+      <hr>  
+      <pre>{{ fileContent }}</pre>
+    </div>
+  </div>
+  <div class="row mt-2">
+    <div class="col-3">
+      <div class="row">
+        <div class="col">
+          <p>Vectores</p>
+          <hr>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <table>
+            <thead>
+              <tr>
+                <th>Q</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let i of states">
+                <td>{{i}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col">
+          <table>
+            <thead>
+              <tr>
+                <th>L</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let i of alphabet">
+                <td>{{i}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col">
+          <table>
+            <thead>
+              <tr>
+                <th>A</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let i of finalStates">
+                <td>{{i}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="row">
+        <div class="col">
+          <p>Matriz AFN</p>
+          <hr>
+        </div>
+      </div>
+      <table class="transition-table">
+        <thead>
+          <tr>
+            <th>Estado</th>
+            <th *ngFor="let s of symbols">{{ s }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let q of states">
+            <td>{{ q }}</td>
+            <td *ngFor="let s of symbols">
+              {{ transitionTable[q][s].length > 0 ? transitionTable[q][s].join(', ') : '-' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col-5">
+      <div class="row">
+        <div class="col">
+          <p>Matriz Autómata Finito Determinista</p>
+          <hr>
+        </div>
+      </div>
+      <div>
+        <table cellpadding="6">
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th *ngFor="let symbol of alphabet">{{ symbol }}</th>
+              <th>Composición</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of table">
+              <td>{{ row.name }}</td>
+              <td *ngFor="let symbol of alphabet">{{ row.transitions[symbol] }}</td>
+              <td>{{ '{' + row.composition.join(',') + '}' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>

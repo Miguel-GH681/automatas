@@ -28,7 +28,8 @@ export class App {
   initialState = '';
   finalStates: string[] = [];
   transitions: Transition[] = [];
-
+  transitionTable: { [state: string]: { [symbol: string]: string[] } } = {};
+  symbols: string[] = [];
   table: TableRow[] = [];
 
   onFileDropped(files: NgxFileDropEntry[]) {
@@ -45,6 +46,7 @@ export class App {
           reader.onload = () => {
             this.fileContent = reader.result as string;
             this.parseFile(this.fileContent);
+            this.generateTransitionTable();
             this.generateTransD();
           };
           reader.readAsText(file);
@@ -54,28 +56,34 @@ export class App {
   }
 
   private parseFile(text: string) {
-    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    const lines = text.split(/\r?\n/);
 
-    for (let line of lines) {
-      if (line.startsWith('Q:')) {
-        this.states = line.match(/\{([^}]*)\}/)?.[1].split(',') || [];
-      } else if (line.startsWith('L:')) {
-        this.alphabet = line.match(/\{([^}]*)\}/)?.[1].split(',') || [];
-      } else if (line.startsWith('i:')) {
-        this.initialState = line.split(':')[1];
-      } else if (line.startsWith('A:')) {
-        this.finalStates = line.match(/\{([^}]*)\}/)?.[1].split(',') || [];
-      } else if (line.startsWith('W:')) {
-        const rawTransitions = line.match(/\{([^}]*)\}/)?.[1];
-        if (rawTransitions) {
-          const parts = rawTransitions.split('),').map(p => p.replace(/[(){}]/g, '').trim());
-          this.transitions = parts.map(p => {
-            const [from, to, symbol] = p.split(';').map(x => x.trim());
-            return { from, to, symbol };
-          });
-        }
+    lines.forEach(line =>{
+      switch(line.substring(0,2)){
+        case 'Q:':
+          this.states = line.match(/\{([^}]*)\}/)?.[1].split(',') || [];
+        break;
+        case 'L:':
+          this.alphabet = line.match(/\{([^}]*)\}/)?.[1].split(',') || [];
+        break;
+        case 'i:':
+          this.initialState = line.split(':')[1];
+        break;
+        case 'A:':
+          this.finalStates = line.match(/\{([^}]*)\}/)?.[1].split(',') || [];
+        break;
+        case 'W:':
+          const rawTransitions = line.match(/\{([^}]*)\}/)?.[1];
+          if (rawTransitions) {
+            const parts = rawTransitions.split('),').map(p => p.replace(/[(){}]/g, ''));
+            this.transitions = parts.map(p => {
+              const [from, to, symbol] = p.split(';');
+              return { from, to, symbol };
+            });
+          }
+        break;
       }
-    }
+    });
   }
 
   private epsilonClosure(stateSet: string[]): string[] {
@@ -107,6 +115,32 @@ export class App {
     }
 
     return Array.from(result);
+  }
+
+  private generateTransitionTable() {
+    // Agregamos todos los símbolos del alfabeto y epsilon si aparece en las transiciones
+    const allSymbols = new Set(this.alphabet);
+    if (this.transitions.some(t => t.symbol === 'e')) {
+      allSymbols.add('ε');
+    }
+    this.symbols = Array.from(allSymbols);
+
+    // Inicializamos estructura vacía
+    this.transitionTable = {};
+    for (const state of this.states) {
+      this.transitionTable[state] = {};
+      for (const s of this.symbols) {
+        this.transitionTable[state][s] = [];
+      }
+    }
+
+    // Llenamos tabla según las transiciones W
+    for (const t of this.transitions) {
+      const symbol = t.symbol === 'e' ? 'ε' : t.symbol;
+      if (!this.transitionTable[t.from][symbol].includes(t.to)) {
+        this.transitionTable[t.from][symbol].push(t.to);
+      }
+    }
   }
 
   private generateTransD() {
