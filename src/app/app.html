@@ -1,64 +1,28 @@
-<div class="wrapper">
-  <div class="header">
-    Autómatas
-    <button class="btn btn-clean" (click)="clean()">Limpiar</button>
+<div class="p-4">
+  <h2>Tabla de Transición D (AFND → AFD)</h2>
+
+  <ngx-file-drop
+    accept=".txt"
+    dropZoneLabel="Arrastra tu archivo aquí"
+    (onFileDrop)="onFileDropped($event)">
+  </ngx-file-drop>
+
+  <div *ngIf="table.length > 0" class="mt-4">
+    <table border="1" cellpadding="6">
+      <thead>
+        <tr>
+          <th>Estado</th>
+          <th *ngFor="let symbol of alphabet">{{ symbol }}</th>
+          <th>Composición</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of table">
+          <td>{{ row.name }}</td>
+          <td *ngFor="let symbol of alphabet">{{ row.transitions[symbol] }}</td>
+          <td>{{ '{' + row.composition.join(',') + '}' }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-  <div class="content">
-    <br><br>
-    <div *ngIf="elements.length == 0">
-      <ngx-file-drop
-        accept=".txt"
-        dropZoneLabel="Arrastra tu archivo aquí"
-        (onFileDrop)="onFileDropped($event)">
-      </ngx-file-drop>
-      <div class="container-image">
-        <img src="assets/img/loading.png" alt="loading">
-      </div>
-    </div>
-    <div *ngIf="elements.length > 0">
-      <div class="header-container-file">
-        <p>Contenido del archivo</p>
-      </div>
-      <div class="container-file">
-        <pre>{{ fileContent }}</pre>
-      </div>
-      <br><br>
-      <div class="row ms-1">
-        <div class="col-md-6">
-          <div class="header-elements-container">
-            Matriz de transición
-          </div>
-          <div class="matrix-container">
-            <div class="row">
-              <div class="col" *ngFor="let i of columns">
-                {{i}}
-              </div>
-            </div> 
-            <div class="row" *ngFor="let i of rows">
-              <div class="col" *ngFor="let j of i">
-                {{j}}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 elements-container">
-          <div class="row">
-            <div class="header-elements-container">
-            </div>
-            <div class="d-flex justify-content-around mt-4">
-              <div class="container-stack" *ngFor="let t of tree">
-                <h5 class="mb-3">{{ t['title'] }}</h5>
-                <div class="stack">
-                  <div class="stackItem" *ngFor="let u of t['elements']">
-                    <b>{{u}}</b>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <br><br>
 </div>

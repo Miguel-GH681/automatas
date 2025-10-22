@@ -2,26 +2,40 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { NgxFileDropEntry, NgxFileDropModule } from 'ngx-file-drop';
 
+interface Transition {
+  from: string;
+  to: string;
+  symbol: string;
+}
+
+interface TableRow {
+  name: string;
+  transitions: { [key: string]: string };
+  composition: string[];
+}
+
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [CommonModule, NgxFileDropModule],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrls: ['./app.css']
 })
 export class App {
-  fileContent: string = '';
-  tree : Array<any> = [{title: 'Aceptación', elemets: []}, {title: 'Alfabeto', elemets: []}, {title: 'Estados', elemets: []}];
-  files: NgxFileDropEntry[] = [];
-  elements: any[] = [];
-  columns : any[] = [];
-  rows : Array<Array<any>> = [[]];
+  fileContent = '';
+  states: string[] = [];
+  alphabet: string[] = [];
+  initialState = '';
+  finalStates: string[] = [];
+  transitions: Transition[] = [];
 
-  public onFileDropped(files: NgxFileDropEntry[]) {
+  table: TableRow[] = [];
+
+  onFileDropped(files: NgxFileDropEntry[]) {
     for (const droppedFile of files) {
       if (droppedFile.fileEntry.isFile) {
         const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
         fileEntry.file((file: File) => {
-
           if (!file.name.endsWith('.txt')) {
             alert('Solo se permiten archivos de texto plano.');
             return;
@@ -30,54 +44,116 @@ export class App {
           const reader = new FileReader();
           reader.onload = () => {
             this.fileContent = reader.result as string;
-            this.getElemets()
+            this.parseFile(this.fileContent);
+            this.generateTransD();
           };
-          reader.readAsText(file);          
+          reader.readAsText(file);
         });
       }
     }
   }
 
-  getElemets(){
-    this.elements = this.fileContent.split("\n");
-    let indices = [3,1,0];
+  private parseFile(text: string) {
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
 
-    indices.forEach((t : number, i : number)=>{
-      let match = this.elements[t].match(/\{([^}]*)\}/)
-      this.tree[i]['elements'] = match[1].split(',');
-    });
-    
-    this.getMatrix();
-  }
-
-
-  getMatrix(){    
-    for(let i = 0; i < this.tree[1]['elements'].length + 1; i++){
-      if(i == 0){
-        this.columns[0] = '';
-      } else{
-        this.columns[i] = this.tree[1]['elements'][i-1]
+    for (let line of lines) {
+      if (line.startsWith('Q:')) {
+        this.states = line.match(/\{([^}]*)\}/)?.[1].split(',') || [];
+      } else if (line.startsWith('L:')) {
+        this.alphabet = line.match(/\{([^}]*)\}/)?.[1].split(',') || [];
+      } else if (line.startsWith('i:')) {
+        this.initialState = line.split(':')[1];
+      } else if (line.startsWith('A:')) {
+        this.finalStates = line.match(/\{([^}]*)\}/)?.[1].split(',') || [];
+      } else if (line.startsWith('W:')) {
+        const rawTransitions = line.match(/\{([^}]*)\}/)?.[1];
+        if (rawTransitions) {
+          const parts = rawTransitions.split('),').map(p => p.replace(/[(){}]/g, '').trim());
+          this.transitions = parts.map(p => {
+            const [from, to, symbol] = p.split(';').map(x => x.trim());
+            return { from, to, symbol };
+          });
+        }
       }
-    }    
-
-    let coordenadas : any= [];
-    let match = this.elements[4].match(/\{([^}]*)\}/)
-    if(match){
-      coordenadas = match[1].split(',');      
     }
-    
-    this.tree[2]['elements'].forEach((sl:any, index : number)=>{
-      let v = coordenadas.filter((coordenada:any)=> coordenada.includes('('+ sl + ';'));
-      this.rows[index] = [sl, v[0].match(/\(([^}]*)\)/)[1].split(';')[1], v[1].match(/\(([^}]*)\)/)[1].split(';')[1]]
-    });    
   }
 
-  clean(){
-    this.fileContent = ''
-    this.elements = []
-    this.tree = [{title: 'Aceptación', elemets: []}, {title: 'Alfabeto', elemets: []}, {title: 'Estados', elemets: []}];
-    this.files = []
-    this.columns = []
-    this.rows = []
+  private epsilonClosure(stateSet: string[]): string[] {
+    const closure = new Set(stateSet);
+    const stack = [...stateSet];
+
+    while (stack.length > 0) {
+      const state = stack.pop()!;
+      for (const t of this.transitions) {
+        if (t.from === state && t.symbol === 'e' && !closure.has(t.to)) {
+          closure.add(t.to);
+          stack.push(t.to);
+        }
+      }
+    }
+
+    return Array.from(closure).sort((a, b) => Number(a) - Number(b));
+  }
+
+  private move(stateSet: string[], symbol: string): string[] {
+    const result = new Set<string>();
+
+    for (const state of stateSet) {
+      for (const t of this.transitions) {
+        if (t.from === state && t.symbol === symbol) {
+          result.add(t.to);
+        }
+      }
+    }
+
+    return Array.from(result);
+  }
+
+  private generateTransD() {
+    this.table = [];
+    const usedNames = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    let nameIndex = 0;
+
+    const stateNames: { [key: string]: string } = {};
+    const processed: string[][] = [];
+    const unprocessed: string[][] = [];
+
+    const start = this.epsilonClosure([this.initialState]);
+    const startKey = start.join(',');
+    stateNames[startKey] = usedNames[nameIndex++];
+    unprocessed.push(start);
+
+    while (unprocessed.length > 0) {
+      const current = unprocessed.shift()!;
+      const currentKey = current.join(',');
+      const currentName = stateNames[currentKey];
+
+      const row: TableRow = {
+        name: currentName,
+        transitions: {},
+        composition: current
+      };
+
+      for (const symbol of this.alphabet) {
+        const moveSet = this.move(current, symbol);
+        const closure = this.epsilonClosure(moveSet);
+
+        if (closure.length === 0) {
+          row.transitions[symbol] = '-';
+          continue;
+        }
+
+        const key = closure.join(',');
+        if (!stateNames[key]) {
+          stateNames[key] = usedNames[nameIndex++];
+          unprocessed.push(closure);
+        }
+
+        row.transitions[symbol] = stateNames[key];
+      }
+
+      processed.push(current);
+      this.table.push(row);
+    }
   }
 }
