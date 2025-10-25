@@ -8,7 +8,7 @@
   </div>
 </div>
 <div class="p-4">
-  <h5>Cargar archivo TXT</h5>
+  <p class="section-title">Cargar archivo .txt</p>
 
   <ngx-file-drop
     accept=".txt"
@@ -16,23 +16,23 @@
     (onFileDrop)="onFileDropped($event)">
   </ngx-file-drop>
 
-  <div class="row mt-2">
+  <div class="row mt-4">
     <div class="col-6">
-      <p>Despliegue del archivo</p>
+      <p class="section-title">Despliegue de archivo</p>
       <hr>
       <pre>{{ fileContent }}</pre>
     </div>
     <div class="col-6">
-      <p>Autómata Finito Determinista</p>
+      <p class="section-title">Autómata Finito Determinista</p>
       <hr>  
-      <pre>{{ fileContent }}</pre>
+      <pre>{{ afdText }}</pre>
     </div>
   </div>
   <div class="row mt-2">
     <div class="col-3">
       <div class="row">
         <div class="col">
-          <p>Vectores</p>
+          <p class="section-title">Vectores</p>
           <hr>
         </div>
       </div>
@@ -84,7 +84,7 @@
     <div class="col-4">
       <div class="row">
         <div class="col">
-          <p>Matriz AFN</p>
+          <p class="section-title">Matriz AFN</p>
           <hr>
         </div>
       </div>
@@ -108,12 +108,12 @@
     <div class="col-5">
       <div class="row">
         <div class="col">
-          <p>Matriz Autómata Finito Determinista</p>
+          <p class="section-title">Matriz Autómata Finito Determinista</p>
           <hr>
         </div>
       </div>
       <div>
-        <table cellpadding="6">
+        <table>
           <thead>
             <tr>
               <th>Estado</th>

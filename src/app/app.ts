@@ -31,6 +31,7 @@ export class App {
   transitionTable: { [state: string]: { [symbol: string]: string[] } } = {};
   symbols: string[] = [];
   table: TableRow[] = [];
+  afdText : string = '';
 
   onFileDropped(files: NgxFileDropEntry[]) {
     for (const droppedFile of files) {
@@ -48,6 +49,7 @@ export class App {
             this.parseFile(this.fileContent);
             this.generateTransitionTable();
             this.generateTransD();
+            this.generateAfdTxt();
           };
           reader.readAsText(file);
         });
@@ -118,14 +120,12 @@ export class App {
   }
 
   private generateTransitionTable() {
-    // Agregamos todos los símbolos del alfabeto y epsilon si aparece en las transiciones
     const allSymbols = new Set(this.alphabet);
     if (this.transitions.some(t => t.symbol === 'e')) {
       allSymbols.add('ε');
     }
     this.symbols = Array.from(allSymbols);
 
-    // Inicializamos estructura vacía
     this.transitionTable = {};
     for (const state of this.states) {
       this.transitionTable[state] = {};
@@ -134,7 +134,6 @@ export class App {
       }
     }
 
-    // Llenamos tabla según las transiciones W
     for (const t of this.transitions) {
       const symbol = t.symbol === 'e' ? 'ε' : t.symbol;
       if (!this.transitionTable[t.from][symbol].includes(t.to)) {
@@ -189,5 +188,38 @@ export class App {
       processed.push(current);
       this.table.push(row);
     }
+  }
+
+  generateAfdTxt(): void {
+    const Q = this.table.map(row => row.name).join(',');
+    const L = this.alphabet.join(',');
+    const i = this.table.length > 0 ? this.table[0].name : '';
+    const A = this.table
+      .filter(row => row.composition.some(c => this.finalStates.includes(c)))
+      .map(row => row.name)
+      .join(',');
+
+    const transitions: string[] = [];
+    for (const row of this.table) {
+      for (const symbol of this.alphabet) {
+        const dest = row.transitions[symbol];
+        if (dest && dest !== '-') {
+          transitions.push(`(${row.name};${dest};${symbol})`);
+        }
+      }
+    }
+    const W = transitions.join(',');
+
+    this.afdText = `Q:{${Q}}
+    L:{${L}}
+    i:${i}
+    A:{${A}}
+    W:{${W}}`;
+
+    this.afdText = 'Q:{' + Q + '} \n' +
+    'L:{' + L + '} \n' +
+    'i:' + i + ' \n' +
+    'A:{' + A + '} \n' +
+    'W:{' + W + '}'
   }
 }
